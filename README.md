@@ -16,11 +16,12 @@ solo de la funda, entonces el cojín no se muestra.
 ``` 
 docker compose up
 ```
-aplicar migraciones a BD
-``` 
-mvn flyway:migrate
-```
 
 ``` 
 mvn clean install
+```
+Ejecutar application para aplicar migraciones de flyway
+ejecutar para almacenar los archivos a base de datos
+```
+curl --location --request GET 'http://localhost:8080/stock'
 ```
