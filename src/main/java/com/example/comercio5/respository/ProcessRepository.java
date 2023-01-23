@@ -1,9 +1,11 @@
 package com.example.comercio5.respository;
 
 import com.example.comercio5.model.Out;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
@@ -16,6 +18,15 @@ public class ProcessRepository {
       + "values (:id, :productid, :backsoon, :special);";
   private final String insertStockQuery = "insert into stock(sizeid, quantity)"
       + "values (:sizeid, :quantity);";
+
+  private final String selectOut = "select productid from product inner join (\n"
+      + "select DISTINCT size.productId from (\n"
+      + "select * from\n"
+      + "(select * from size inner join  stock on size.id = stock.sizeid and size.special = true and stock.quantity >0) b\n"
+      + "    inner join\n"
+      + " (select * from size inner join  stock on size.id = stock.sizeid and size.special = false and stock.quantity >0) c on b.productid = c.productid\n"
+      + "    ) d, size where size.backsoon = true\n"
+      + "    ) f on product.id = f.productid  order by sequence";
 
   public ProcessRepository(NamedParameterJdbcTemplate jdbcTemplate) {
     this.namedParameterJdbcTemplate = jdbcTemplate;
@@ -39,6 +50,11 @@ public class ProcessRepository {
   }
 
   public List<Out> getOutput(){
-    return Collections.emptyList();
+   List<Out> result= namedParameterJdbcTemplate.query(selectOut, BeanPropertyRowMapper.newInstance(Out.class));
+    System.out.println(Arrays.toString(result.toArray()));
+    for (Out st : result){
+      System.out.println(st.getProductId()+",");
+    }
+    return result; //Collections.emptyList();
   }
 }

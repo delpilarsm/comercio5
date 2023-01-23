@@ -25,6 +25,12 @@ public class ProcessService {
     return "Batch job has been invoked";
   }
 
+  @RequestMapping("/out")
+  public String out() throws Exception {
+    processRepository.getOutput();
+    return "Batch job has been invoked";
+  }
+
   public void processProduct() {
     try (BufferedReader fileReader
              = new BufferedReader(new FileReader("product.csv"))) {
@@ -69,4 +75,5 @@ public class ProcessService {
       e.printStackTrace();
     }
   }
+
 }
