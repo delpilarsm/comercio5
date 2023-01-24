@@ -13,6 +13,7 @@ hay stock tanto del relleno como de la funda, si no hay stock de ninguno o solo 
 solo de la funda, entonces el cojín no se muestra.
 
 
+Levantar contenedor de bade de datos porstgres
 ``` 
 docker compose up
 ```
@@ -20,8 +21,14 @@ docker compose up
 ``` 
 mvn clean install
 ```
-Ejecutar application para aplicar migraciones de flyway
-ejecutar para almacenar los archivos a base de datos
+Abrir el proyecto y ejecutar Application para aplicar migraciones de flyway.
+
+Ejecutar para processar archivos product, size, stock.csv a Bade de Datos.
 ```
-curl --location --request GET 'http://localhost:8080/stock'
+curl --location --request GET 'http://localhost:8080/load'
 ```
+
+Obtener el resultado de visibilidad:
+
+``curl --location --request GET 'http://localhost:8080/out``
+

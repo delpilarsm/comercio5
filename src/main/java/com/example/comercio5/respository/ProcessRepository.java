@@ -1,9 +1,7 @@
 package com.example.comercio5.respository;
 
 import com.example.comercio5.model.Out;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.Iterator;
 import java.util.Map;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -19,14 +17,10 @@ public class ProcessRepository {
   private final String insertStockQuery = "insert into stock(sizeid, quantity)"
       + "values (:sizeid, :quantity);";
 
-  private final String selectOut = "select productid from product inner join (\n"
-      + "select DISTINCT size.productId from (\n"
-      + "select * from\n"
-      + "(select * from size inner join  stock on size.id = stock.sizeid and size.special = true and stock.quantity >0) b\n"
-      + "    inner join\n"
-      + " (select * from size inner join  stock on size.id = stock.sizeid and size.special = false and stock.quantity >0) c on b.productid = c.productid\n"
-      + "    ) d, size where size.backsoon = true\n"
-      + "    ) f on product.id = f.productid  order by sequence";
+  private final String selectOut = "select productid from product inner join ( select DISTINCT size.productId from "
+      + "(select * from (select * from size inner join  stock on size.id = stock.sizeid and size.special = true and stock.quantity >0) b inner join"
+      + "(select * from size inner join  stock on size.id = stock.sizeid and size.special = false and stock.quantity >0) c "
+      + " on b.productid = c.productid) d, size where size.backsoon = true) f on product.id = f.productid  order by sequence";
 
   public ProcessRepository(NamedParameterJdbcTemplate jdbcTemplate) {
     this.namedParameterJdbcTemplate = jdbcTemplate;
@@ -44,17 +38,22 @@ public class ProcessRepository {
     namedParameterJdbcTemplate.update(insertSizeQuery, map);
   }
 
-  public void saveStock(int sizeid, int quantity) {
-    Map<String, Object> map = Map.of("sizeid", sizeid, "quantity", quantity);
+  public void saveStock(int sizeId, int quantity) {
+    Map<String, Object> map = Map.of("sizeid", sizeId, "quantity", quantity);
     namedParameterJdbcTemplate.update(insertStockQuery, map);
   }
 
-  public List<Out> getOutput(){
-   List<Out> result= namedParameterJdbcTemplate.query(selectOut, BeanPropertyRowMapper.newInstance(Out.class));
-    System.out.println(Arrays.toString(result.toArray()));
-    for (Out st : result){
-      System.out.println(st.getProductId()+",");
+  public String getOutput() {
+    // Desde el query obtener la lista de productsId en un iterator, con el objetivo de facilitar iterar el output separado por ,
+    Iterator<Out> result = namedParameterJdbcTemplate.query(selectOut, BeanPropertyRowMapper.newInstance(Out.class)).iterator();
+    StringBuffer line = new StringBuffer();
+    if (result.hasNext()) {
+      line.append(result.next().getProductId());
     }
-    return result; //Collections.emptyList();
+    while (result.hasNext()) {
+      line.append("," + result.next().getProductId());
+    }
+    System.out.print(line);
+    return line.toString();
   }
 }
